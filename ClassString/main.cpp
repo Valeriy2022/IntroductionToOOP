@@ -26,6 +26,8 @@ public:
 		return str;
 	}
 
+	// ----------------- Constractors: ----------------------------------------------------------------
+
 	explicit String(int size = 80)
 	{
 		this->size = size;
@@ -36,7 +38,8 @@ public:
 	{
 		this->size = strlen(str) + 1;
 		this->str = new char[size]{};
-		for (int i = 0; str[i]; i++)this->str[i] = str[i];
+		for (int i = 0; str[i]; i++)
+			this->str[i] = str[i];
 		cout << "Constructor:\t" << this << endl;
 	}
 	String(const String& other)
@@ -47,13 +50,27 @@ public:
 		for (int i = 0; i < size; i++)this->str[i] = other.str[i];
 		cout << "CopyConstructor:\t" << this << endl;
 	}
+
+	String(String&& other)noexcept//никогда не бросает исключение
+	{
+		//MoveConstructor должен выполнять поверхностное копирование (Shallow copy)
+		this->size = other.size;
+		this->str = other.str;//просто копируем адрес памяти, пренадлещаей другому объекту
+		//Зануляем другой объект, для того, чтобы его память не смог удалить деструктор:
+		other.size = 0;
+		other.str = nullptr;
+
+		cout << "MoveConstructor:\t" << this << endl;
+	}
+
 	~String()
 	{
 		delete[] str;
 		cout << "Destructor:\t" << this << endl;
 	}
 
-	//					Operators:
+	// ------------------ Operators: ------------------------------------------------------------------
+
 	String& operator=(const String& other)
 	{
 		if (this == &other)return *this;	//Проверяем, не являются ли this и other одним и тем же объектом
@@ -65,6 +82,24 @@ public:
 		cout << "CopyAssignment:\t" << this << endl;
 		return *this;
 	}
+	String& operator=(String&& other)
+	{
+		if (this == &other)return *this;
+		delete this->str;
+		this->size = other.size;
+		this->str = other.str;
+
+		other.size = 0;
+		other.str = nullptr;
+		cout << "MoveAssignment:\t" << this << endl;
+		return *this;
+	}
+
+	//Class(const Class& other);	//CopyConstructor
+	//Class& operator=(const Class& other);	//CopyAssignment
+
+	//Class(Class&& other);			//MoveConstructor
+	//Class& operator=(Class&& other);		//MoveAssignment
 	String& operator+=(const String& other)
 	{
 		return *this = *this + other;
@@ -79,7 +114,8 @@ public:
 		return str[i];
 	}
 
-	//					Methods
+	// --------------------	Methods: -----------------------------------------------------------------
+
 	void print()const
 	{
 		cout << "Size:\t" << size << endl;
@@ -99,7 +135,6 @@ String operator+(const String& left, const String& right)
 		//result.get_str()[i + left.get_size() - 1] = right.get_str()[i];
 	return result;
 }
-
 std::ostream& operator<<(std::ostream& os, const String& obj)
 {
 	return os << obj.get_str();
@@ -113,7 +148,6 @@ std::istream& operator>>(std::istream& is, String& obj)
 	obj = buffer;
 	return is;
 }
-
 std::istream& getline(std::istream& is, String& obj)
 {
 	const int SIZE = 1024 * 1000;
@@ -123,10 +157,8 @@ std::istream& getline(std::istream& is, String& obj)
 	return is;//winver
 }
 
-//char str[] = { 'S', 't', 'r', 'o', 'k', 'a' };
-
 //#define CONSTRUCTORS_CHECK
-//#define OPERATORS_CHECK
+#define OPERATORS_CHECK
 
 void main()
 {
@@ -168,17 +200,19 @@ void main()
 	cout << delimiter << endl;
 	cout << str3 << endl;
 	cout << delimiter << endl;
-	str1 += str2;
+	/*str1 += str2;
 	cout << delimiter << endl;
 	cout << str1 << endl;
-	cout << delimiter << endl;
+	cout << delimiter << endl;*/
 #endif // OPERATORS_CHECK
 
 
-	String str;
-	cout << "Введите строку: "; 
-	//cin >> str;
-	getline(cin, str);
-	cout << str << endl;
-	str.print();
+	//String str;
+	//cout << "Введите строку: "; 
+	////cin >> str;
+	//getline(cin, str);
+	//cout << str << endl;
+	//str.print();
+
+
 }
