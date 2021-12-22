@@ -2,7 +2,9 @@
 using std::cin;
 using std::cout;
 using std::endl;
-
+//Move-методы:
+//MoveConstructor - Конструктор переноса
+//MoveAssignment  - Оператор присваивания-переноса
 #define delimiter "\n-------------------------------------------------\n"
 
 class String;
@@ -28,26 +30,25 @@ public:
 
 	explicit String(int size = 80)
 	{
-		//this->size = size;
-		//this->str = new char[size] {};	//Память, выделяемую для строки обязательно нужно занулить
+		this->size = size;
+		this->str = new char[size] {};	//Память, выделяемую для строки обязательно нужно занулить
 		cout << "SizeConstructor:\t" << this << endl;
 	}
-	String(const char str[]) :String(strlen(str) + 1)
+	String(const char str[])
 	{
 		this->size = strlen(str) + 1;
-		this->str = new char[size]{};
+		this->str = new char[size] {};
 		for (int i = 0; str[i]; i++)this->str[i] = str[i];
 		cout << "Constructor:\t" << this << endl;
 	}
-	String(const String& other) :String(other.str)
+	String(const String& other)
 	{
 		//Deep copy (Побитовое копирование):
-		//this->size = other.size;
-		//this->str = new char[size] {};
-		//for (int i = 0; i < size; i++)this->str[i] = other.str[i];
+		this->size = other.size;
+		this->str = new char[size] {};
+		for (int i = 0; i < size; i++)this->str[i] = other.str[i];
 		cout << "CopyConstructor:\t" << this << endl;
 	}
-
 	String(String&& other)noexcept//никогда не бросает исключение
 	{
 		//MoveConstructor должен выполнять поверхностное копирование (Shallow copy)
@@ -59,17 +60,17 @@ public:
 
 		cout << "MoveConstructor:\t" << this << endl;
 	}
-
 	~String()
 	{
 		delete[] str;
 		cout << "Destructor:\t" << this << endl;
 	}
 
-	// ------------------ Operators: ------------------------------------------------------------------
-
+	//					Operators:
 	String& operator=(const String& other)
 	{
+
+		//l-value = r-value;
 		if (this == &other)return *this;	//Проверяем, не являются ли this и other одним и тем же объектом
 		delete[] this->str;
 		//Deep copy (Побитовое копирование):
@@ -97,6 +98,7 @@ public:
 
 	//Class(Class&& other);			//MoveConstructor
 	//Class& operator=(Class&& other);		//MoveAssignment
+
 	String& operator+=(const String& other)
 	{
 		return *this = *this + other;
@@ -111,8 +113,7 @@ public:
 		return str[i];
 	}
 
-	// --------------------	Methods: -----------------------------------------------------------------
-
+	//					Methods
 	void print()const
 	{
 		cout << "Size:\t" << size << endl;
@@ -132,6 +133,7 @@ String operator+(const String& left, const String& right)
 	//result.get_str()[i + left.get_size() - 1] = right.get_str()[i];
 	return result;
 }
+
 std::ostream& operator<<(std::ostream& os, const String& obj)
 {
 	return os << obj.get_str();
@@ -145,6 +147,7 @@ std::istream& operator>>(std::istream& is, String& obj)
 	obj = buffer;
 	return is;
 }
+
 std::istream& getline(std::istream& is, String& obj)
 {
 	const int SIZE = 1024 * 1000;
@@ -154,8 +157,10 @@ std::istream& getline(std::istream& is, String& obj)
 	return is;//winver
 }
 
+//char str[] = { 'S', 't', 'r', 'o', 'k', 'a' };
+
 //#define CONSTRUCTORS_CHECK
-//#define OPERATORS_CHECK
+#define OPERATORS_CHECK
 
 void main()
 {
@@ -193,10 +198,12 @@ void main()
 	String str1 = "Hello";
 	String str2 = "World";
 	cout << delimiter << endl;
-	String str3 = str1 + str2;
+	String str3;
+	str3 = str1 + str2;
 	cout << delimiter << endl;
 	cout << str3 << endl;
 	cout << delimiter << endl;
+	String str4 = str3;	//CopyConstructor - Deep copy
 	/*str1 += str2;
 	cout << delimiter << endl;
 	cout << str1 << endl;
@@ -204,10 +211,10 @@ void main()
 #endif // OPERATORS_CHECK
 
 
-	String str;
-	cout << "Введите строку: "; 
-	//cin >> str;
-	getline(cin, str);
-	cout << str << endl;
-	str.print();
+	//String str;
+	//cout << "Введите строку: "; 
+	////cin >> str;
+	//getline(cin, str);
+	//cout << str << endl;
+	//str.print();
 }
